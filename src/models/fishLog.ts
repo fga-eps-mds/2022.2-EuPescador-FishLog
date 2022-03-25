@@ -1,97 +1,57 @@
-import { Schema, model, Document } from 'mongoose';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-export interface IFishLog extends Document {
-  userId: number;
-  name: string;
-  largeGroup: string;
-  group: string;
-  species: string;
-  family: string;
-  coordenates: {
+@Entity('fishLog')
+export class FishLog {
+  @PrimaryGeneratedColumn('increment')
+  id?: number;
+
+  @Column({ nullable: true })
+  name?: string;
+
+  @Column({ nullable: true })
+  largeGroup?: string;
+
+  @Column({ nullable: true })
+  group?: string;
+
+  @Column({ nullable: true })
+  species?: string;
+
+  @Column({ nullable: true })
+  family?: string;
+
+  @Column({ nullable: true })
+  coordenates?: {
     latitude: number;
     longitude: number;
   };
-  photo: Buffer;
-  length: number;
-  weight: number;
-  reviewed: boolean;
-  reviewedBy: number;
-  createdAt: Date;
-  updatedAt: Date;
-  updatedBy: number;
-  deletedAt: Date;
-  deletedBy: number;
+  @Column({ nullable: true })
+  photo?: Buffer;
+
+  @Column({ nullable: true })
+  length?: number;
+
+  @Column({ nullable: true })
+  weight?: number;
+
+  @Column({ nullable: true })
+  reviewed?: boolean;
+
+  @Column({ nullable: true })
+  reviewedBy?: number;
+
+  @Column({ nullable: true })
+  createdAt?: Date;
+
+  @Column({ nullable: true })
+  updatedAt?: Date;
+
+  @Column({ nullable: true, array: true })
+  updatedBy?: number[];
+
+  @Column({ nullable: true })
+  deletedAt?: Date;
+
+  @Column({ nullable: true })
+  deletedBy?: number;
 }
-
-const fishLogSchema = new Schema<IFishLog>(
-  {
-    userId: {
-      type: Schema.Types.ObjectId,
-      required: true,
-    },
-    name: {
-      type: String,
-      required: false,
-    },
-    largeGroup: {
-      type: String,
-      required: false,
-    },
-    group: {
-      type: String,
-      required: false,
-    },
-    species: {
-      type: String,
-      required: false,
-    },
-    family: {
-      type: String,
-      required: false,
-    },
-    coordenates: {
-      latitude: {
-        type: Number,
-        required: false,
-      },
-      longitude: {
-        type: Number,
-        required: false,
-      },
-    },
-    photo: {
-      type: Buffer,
-      required: false,
-    },
-    length: {
-      type: Number,
-      required: false,
-    },
-    weight: {
-      type: Number,
-      required: false,
-    },
-    reviewed: {
-      type: Boolean,
-      default: false,
-    },
-    reviewedBy: {
-      type: Schema.Types.ObjectId,
-      required: false,
-    },
-    updatedBy: {
-      type: [Schema.Types.ObjectId],
-      required: false,
-    },
-    deletedAt: {
-      type: Date,
-    },
-    deletedBy: {
-      type: Schema.Types.ObjectId,
-      required: false,
-    },
-  },
-  { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
-);
-
-export default model<IFishLog>('FishLog', fishLogSchema);
