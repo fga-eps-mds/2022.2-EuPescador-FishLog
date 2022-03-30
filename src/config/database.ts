@@ -1,3 +1,4 @@
+import { FishLog } from '../models/fishLog';
 import { DataSource } from 'typeorm';
 
 export const connection = new DataSource({
@@ -7,7 +8,7 @@ export const connection = new DataSource({
   username: 'root',
   password: 'admin',
   database: 'log',
-  entities: [],
+  entities: [FishLog],
   synchronize: true,
   logging: false,
 });

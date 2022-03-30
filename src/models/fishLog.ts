@@ -20,13 +20,13 @@ export class FishLog {
   @Column({ nullable: true })
   family?: string;
 
-  @Column({ nullable: true })
+  @Column('simple-json' ,{ nullable: true })
   coordenates?: {
     latitude: number;
     longitude: number;
   };
   @Column({ nullable: true })
-  photo?: Buffer;
+  photo?: string;
 
   @Column({ nullable: true })
   length?: number;
@@ -46,7 +46,7 @@ export class FishLog {
   @Column({ nullable: true })
   updatedAt?: Date;
 
-  @Column({ nullable: true, array: true })
+  @Column('simple-array', { nullable: true, array: true })
   updatedBy?: number[];
 
   @Column({ nullable: true })
