@@ -10,6 +10,8 @@ const auth = new AuthService();
 export default class FishController {
   createFishLog = async (req: Request, res: Response) => {
     try {
+      const { coordenates } = req.body;
+
       if (!(req.body.name || req.body.species || req.body.photo)) {
         return res.status(400).json({
           message:
@@ -17,7 +19,11 @@ export default class FishController {
         });
       }
       const fishLogRepository = connection.getRepository(FishLog);
-      const fish = await fishLogRepository.save(req.body);
+      const fish = await fishLogRepository.save({
+        ...req.body,
+        latitude: coordenates.latitude,
+        longitude: coordenates.longitude
+      });
 
       return res.status(200).json({ fish });
     } catch (error) {
@@ -39,7 +45,6 @@ export default class FishController {
       if (!data.admin) {
         nonEmptyOrNull.push(['userId', data.id]);
       }
-      console.log(nonEmptyOrNull);
 
       const query = Object.fromEntries(nonEmptyOrNull);
       const fishLogRepository = connection.getRepository(FishLog);
@@ -66,7 +71,8 @@ export default class FishController {
           message: 'Relatório não encontrado',
         });
       }
-      if (data.admin || String(fishLog?.id) === data.id) {
+
+      if (data.admin || fishLog?.id === data.id) {
         return res.status(200).json(fishLog);
       }
       return res.status(401).json({
