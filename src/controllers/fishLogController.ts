@@ -2,8 +2,7 @@ import { Request, Response } from 'express';
 import { FishLog } from '../models/fishLog';
 import { connection } from '../config/database';
 import AuthService from '../middleware/auth';
-
-const Object2Csv = require('objects-to-csv');
+import { generateContentTXT } from '../utils/generateTXT';
 
 const auth = new AuthService();
 
@@ -178,7 +177,7 @@ export default class FishController {
     }
   };
 
-  generateCSV = async (req: Request, res: Response) => {
+  generateTXT = async (req: Request, res: Response) => {
     try {
       const token = req.headers.authorization?.split(' ')[1];
       const data = JSON.parse(await auth.decodeToken(token as string));
@@ -196,17 +195,20 @@ export default class FishController {
             return {
               "Especie": fishLog.species,
               "Grande Grupo": fishLog.largeGroup,
-              "Coordenadas": fishLog.coordenates,
+              "Latitude": fishLog.coordenates?.latitude,
+              "Longitude": fishLog.coordenates?.longitude,
               "Tamanho (cm)": fishLog.length,
               "Peso (kg)": fishLog.weight,
             };
           throw new Error();
         });
-        const csvFile = await new Object2Csv(
-          await Promise.all(fishLogArray)
-        ).toString();
-        res.attachment('Registro.csv');
-        return res.status(200).send(csvFile);
+
+        console.log(fishLogArray);
+
+        await Promise.all(fishLogArray);
+        const txtFile = generateContentTXT(fishLogArray);
+        res.attachment('Registro.txt');
+        return res.status(200).send(txtFile);
       }
       return res.status(401).json({ message: 'Autorização negada!' });
     } catch (error) {
