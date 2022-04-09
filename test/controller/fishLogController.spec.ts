@@ -26,6 +26,10 @@ describe('Test Create FishLog function', () => {
     mockRequest.body = {
       id: '1',
       species: 'aa',
+      coordenates: {
+        latitude: 1,
+        longitude: 2
+      }
     };
 
     const response = mockResponse();
@@ -346,7 +350,7 @@ describe('Test delete FishLog function', () => {
   });
 });
 
-describe('Test generate fishlog csv function', () => {
+describe('Test generate fishlog txt function', () => {
   it('should get a statusCode 200 with admin request', async () => {
     const mockRequest = {} as Request;
     const fishLogRepository = connection.getRepository(FishLog); 
@@ -358,8 +362,8 @@ describe('Test generate fishlog csv function', () => {
       id_array: '3472417428',
     };
     const response = mockResponse();
-    fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
-    const res = await fishLogController.generateCSV(mockRequest, response);
+    fishLogRepository.findOneBy = jest.fn().mockResolvedValueOnce(fishMock);
+    const res = await fishLogController.generateTXT(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
@@ -374,8 +378,8 @@ describe('Test generate fishlog csv function', () => {
       id_array: '3472417428',
     };
     const response = mockResponse();
-    fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
-    const res = await fishLogController.generateCSV(mockRequest, response);
+    fishLogRepository.findOneBy = jest.fn().mockResolvedValueOnce(fishMock);
+    const res = await fishLogController.generateTXT(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(401);
   });
 });

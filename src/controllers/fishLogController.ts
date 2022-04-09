@@ -189,24 +189,25 @@ export default class FishController {
       console.log(fishIdArray);
 
       if (data.admin) {
-        const fishLogArray = fishIdArray.map(async (el: string) => {
+        const fishLogArray = [];
+        for await (const el of fishIdArray) {
           const fishLog = await fishLogRepository.findOneBy({ id: Number(el) });
           if (fishLog)
-            return {
-              "Especie": fishLog.species,
-              "Grande Grupo": fishLog.largeGroup,
-              "Latitude": fishLog.coordenates?.latitude,
-              "Longitude": fishLog.coordenates?.longitude,
-              "Tamanho (cm)": fishLog.length,
-              "Peso (kg)": fishLog.weight,
-            };
-          throw new Error();
-        });
+            fishLogArray.push(
+              {
+                "Especie": fishLog.species,
+                "Grande Grupo": fishLog.largeGroup,
+                "Latitude": fishLog.coordenates?.latitude,
+                "Longitude": fishLog.coordenates?.longitude,
+                "Tamanho (cm)": fishLog.length,
+                "Peso (kg)": fishLog.weight,
+              }
+            )
+        }
 
-        await Promise.all(fishLogArray);
-        console.log(fishLogArray);
+        console.log('fishlogArray', fishLogArray);
         const txtFile = generateContentTXT(fishLogArray);
-        console.log(txtFile);
+        console.log('txtfile:', txtFile);
         
         res.attachment('Registro.txt');
         return res.status(200).send(txtFile);
