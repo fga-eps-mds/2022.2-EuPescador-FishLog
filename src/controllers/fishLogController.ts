@@ -203,10 +203,11 @@ export default class FishController {
           throw new Error();
         });
 
-        console.log(fishLogArray);
-
         await Promise.all(fishLogArray);
+        console.log(fishLogArray);
         const txtFile = generateContentTXT(fishLogArray);
+        console.log(txtFile);
+        
         res.attachment('Registro.txt');
         return res.status(200).send(txtFile);
       }

@@ -11,6 +11,7 @@ export function generateContentTXT(fishList:any[]){
             txtPeixe += line;
         }
         txt += txtPeixe + "\n" + "==================================================" + "\n"  
+        console.log(txt)
     }
     return txt;
 }
