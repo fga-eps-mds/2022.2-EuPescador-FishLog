@@ -9,19 +9,22 @@ services:
     volumes:
       - ./src:/home/node/app/src
       - ./nodemon.json:/home/node/app/nodemon.json
-    container_name: proespecies-fishlog
+    container_name: eu-pescador-fishlog
     expose:
       - '4001'
     ports:
       - '4001:4001'
     command: npm run dev
   db:
-    container_name: mongoDBFishLog
-    image: mongo:latest
+    container_name: postgresDbLog
+    image: "postgres:latest"
     restart: always
     volumes:
       - ./fishLog:/data/db
+    command: postgres -c port=5434
     environment:
-      - MONGO_INITDB_DATABASE=Fish
-    ports:
-      - 27018:27018
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: log
+    ports: 
+      - '5434:5434'
