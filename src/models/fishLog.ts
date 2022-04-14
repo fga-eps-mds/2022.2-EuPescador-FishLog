@@ -46,8 +46,8 @@ export class FishLog {
   @Column({ nullable: true })
   updatedAt?: Date;
 
-  @Column('simple-array', { nullable: true, array: true })
-  updatedBy?: number[];
+  @Column({ nullable: true })
+  updatedBy?: number;
 
   @Column({ nullable: true })
   deletedAt?: Date;

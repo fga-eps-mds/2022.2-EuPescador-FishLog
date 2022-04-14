@@ -111,11 +111,9 @@ export default class FishController {
                 'É necessário ao menos informar foto, espécie ou nome do peixe',
             });
           }
-          const fishLogRepository = connection.getRepository(FishLog);
-          const fishLog = await fishLogRepository.findOne({ where: {id: Number(logId)} });
-          await fishLogRepository.save(newFishLog);
 
-          // await fishLog.updateOne({ $push: { updatedBy: data.id } });
+          const fishLogRepository = connection.getRepository(FishLog);
+          await fishLogRepository.update({id: Number(logId)}, {...newFishLog});
 
           return res.status(200).json({
             message: 'Registo atualizado com sucesso!',
