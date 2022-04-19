@@ -41,13 +41,16 @@ export class FishLog {
   reviewedBy?: number;
 
   @Column({ nullable: true })
+  visible?: boolean;
+
+  @Column({ nullable: true })
   createdAt?: Date;
 
   @Column({ nullable: true })
   updatedAt?: Date;
 
-  @Column('simple-array', { nullable: true, array: true })
-  updatedBy?: number[];
+  @Column({ nullable: true })
+  updatedBy?: number;
 
   @Column({ nullable: true })
   deletedAt?: Date;
