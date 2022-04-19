@@ -41,6 +41,9 @@ export class FishLog {
   reviewedBy?: number;
 
   @Column({ nullable: true })
+  visible?: boolean;
+
+  @Column({ nullable: true })
   createdAt?: Date;
 
   @Column({ nullable: true })
