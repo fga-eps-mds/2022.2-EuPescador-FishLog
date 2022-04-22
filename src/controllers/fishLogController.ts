@@ -101,7 +101,7 @@ export default class FishController {
       }
 
       if (
-        data.admin ||
+        data.admin || data.superAdmin ||
         (!fishLog.reviewed && String(fishLog?.id) === data.id)
       ) {
         try {
