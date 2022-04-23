@@ -65,13 +65,15 @@ export default class FishController {
       const fishLogRepository = connection.getRepository(FishLog);
       const fishLog = await fishLogRepository.findOne({ where: {id: Number(logId)} });
 
+      console.log(data?.id);
+
       if (!fishLog) {
         return res.status(404).json({
           message: 'Relatório não encontrado',
         });
       }
 
-      if (data.admin || fishLog?.id === data.id) {
+      if (data.admin || fishLog?.id === data.id || data.superAdmin) {
         return res.status(200).json(fishLog);
       }
       return res.status(401).json({
@@ -150,7 +152,7 @@ export default class FishController {
       }
 
       if (
-        data.admin ||
+        data.admin || data.superAdmin
         (!fishLog.reviewed && String(fishLog?.id) === data.id)
       ) {
         try {
