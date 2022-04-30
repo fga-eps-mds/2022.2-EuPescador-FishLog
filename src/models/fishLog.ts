@@ -47,6 +47,9 @@ export class FishLog {
   createdAt?: Date;
 
   @Column({ nullable: true })
+  createdBy?: number;
+
+  @Column({ nullable: true })
   updatedAt?: Date;
 
   @Column({ nullable: true })

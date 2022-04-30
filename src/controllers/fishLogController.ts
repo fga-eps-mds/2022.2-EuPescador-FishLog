@@ -37,17 +37,14 @@ export default class FishController {
       const token = req.headers.authorization?.split(' ')[1];
       const data = JSON.parse(await auth.decodeToken(token as string));
 
-      const entries = Object.entries(req.query);
-      const nonEmptyOrNull = entries.filter(
-        ([, val]) => val !== '' && val !== null
-      );
-      if (!data.admin) {
-        nonEmptyOrNull.push(['userId', data.id]);
-      }
-
-      const query = Object.fromEntries(nonEmptyOrNull);
       const fishLogRepository = connection.getRepository(FishLog);
-      const allFishLogs = await fishLogRepository.find(query);
+
+      let allFishLogs: FishLog[] = [];
+      if (data.admin || data.superAdmin) {
+        allFishLogs = await fishLogRepository.find();
+      } else {
+        allFishLogs = await fishLogRepository.find({ where: { createdBy: Number(data.id) } });
+      }
 
       return res.status(200).json(allFishLogs);
     } catch (error) {
@@ -65,15 +62,13 @@ export default class FishController {
       const fishLogRepository = connection.getRepository(FishLog);
       const fishLog = await fishLogRepository.findOne({ where: {id: Number(logId)} });
 
-      console.log(data?.id);
-
       if (!fishLog) {
         return res.status(404).json({
           message: 'Relatório não encontrado',
         });
       }
 
-      if (data.admin || fishLog?.id === data.id || data.superAdmin) {
+      if (data.admin || fishLog?.createdBy === data.id || data.superAdmin) {
         return res.status(200).json(fishLog);
       }
       return res.status(401).json({
@@ -152,8 +147,8 @@ export default class FishController {
       }
 
       if (
-        data.admin || data.superAdmin
-        (!fishLog.reviewed && String(fishLog?.id) === data.id)
+        data.admin || data.superAdmin ||
+        (!fishLog.reviewed && Number(fishLog?.createdBy) === data.id)
       ) {
         try {
           await fishLogRepository.remove(fishLog);
