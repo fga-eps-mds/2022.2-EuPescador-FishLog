@@ -9,6 +9,7 @@ const fishMock = {
   id: '61323c37dc4d0100225782f8',
   specie: 'aa',
   reviewed: false,
+  createdBy: '61323c37dc4d0100225782f8',
 };
 const mockResponse = () => {
   const response = {} as Response;
