@@ -99,7 +99,7 @@ export default class FishController {
 
       if (
         data.admin || data.superAdmin ||
-        (!fishLog.reviewed && String(fishLog?.id) === data.id)
+        (!fishLog.reviewed && Number(fishLog?.createdBy) === data.id)
       ) {
         try {
           if (!(req.body.name || req.body.species || req.body.photo)) {
