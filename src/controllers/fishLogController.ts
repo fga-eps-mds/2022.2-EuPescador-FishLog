@@ -40,11 +40,7 @@ export default class FishController {
       const fishLogRepository = connection.getRepository(FishLog);
 
       let allFishLogs: FishLog[] = [];
-      if (data.admin || data.superAdmin) {
-        allFishLogs = await fishLogRepository.find();
-      } else {
-        allFishLogs = await fishLogRepository.find({ where: { createdBy: Number(data.id) } });
-      }
+      allFishLogs = await fishLogRepository.find({ where: { createdBy: Number(data.id) } });
 
       return res.status(200).json(allFishLogs);
     } catch (error) {
