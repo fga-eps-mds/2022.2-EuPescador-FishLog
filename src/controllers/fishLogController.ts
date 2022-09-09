@@ -50,6 +50,28 @@ export default class FishController {
     }
   };
 
+  getAllFishLogsAdmin = async (req: Request, res: Response) => {
+    try {
+      const token = req.headers.authorization?.split(' ')[1];
+      const data = JSON.parse(await auth.decodeToken(token as string));
+
+      const fishLogRepository = connection.getRepository(FishLog);
+
+      let allFishLogs: FishLog[] = [];
+      if (data.admin || data.superAdmin) {
+        allFishLogs = await fishLogRepository.find();
+      } else {
+        allFishLogs = await fishLogRepository.find({ where: { createdBy: Number(data.id) } });
+      }
+
+      return res.status(200).json(allFishLogs);
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Falha ao processar requisição',
+      });
+    }
+  };
+
   getOneFishLog = async (req: Request, res: Response) => {
     try {
       const token = req.headers.authorization?.split(' ')[1];
