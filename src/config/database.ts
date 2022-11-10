@@ -18,5 +18,5 @@ export const connection = new DataSource({
           rejectUnauthorized: false,
         },
       }
-    : null,
+    : {ssl: false},
 });
