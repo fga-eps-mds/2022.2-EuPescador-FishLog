@@ -1,27 +1,24 @@
 import { Request, Response } from 'express';
-import { FishLog } from '../models/fishLog';
-import { connection } from '../config/database';
+import { v4 as uuidV4 } from 'uuid';
+import { FishLog } from '../database/entities/fishLog';
+import { connection } from '../database';
 import AuthService from '../middleware/auth';
-import { generateContentTXT } from '../utils/generateTXT';
 
 const auth = new AuthService();
+const fishLogRepository = connection.getRepository(FishLog);
 
 export default class FishController {
   createFishLog = async (req: Request, res: Response) => {
     try {
-      const { coordenates } = req.body;
-
       if (!(req.body.name || req.body.species || req.body.photo)) {
         return res.status(400).json({
           message:
             'Registro não foi criado, é necessário o nome, a espécie ou a foto para a criação de um registro.',
         });
       }
-      const fishLogRepository = connection.getRepository(FishLog);
       const fish = await fishLogRepository.save({
+        id: uuidV4(),
         ...req.body,
-        latitude: coordenates.latitude,
-        longitude: coordenates.longitude
       });
 
       return res.status(200).json({ fish });
@@ -37,10 +34,10 @@ export default class FishController {
       const token = req.headers.authorization?.split(' ')[1];
       const data = JSON.parse(await auth.decodeToken(token as string));
 
-      const fishLogRepository = connection.getRepository(FishLog);
-
       let allFishLogs: FishLog[] = [];
-      allFishLogs = await fishLogRepository.find({ where: { createdBy: Number(data.id) } });
+      allFishLogs = await fishLogRepository.find({
+        where: { createdBy: data.id },
+      });
 
       return res.status(200).json(allFishLogs);
     } catch (error) {
@@ -55,13 +52,13 @@ export default class FishController {
       const token = req.headers.authorization?.split(' ')[1];
       const data = JSON.parse(await auth.decodeToken(token as string));
 
-      const fishLogRepository = connection.getRepository(FishLog);
-
       let allFishLogs: FishLog[] = [];
       if (data.admin || data.superAdmin) {
         allFishLogs = await fishLogRepository.find();
       } else {
-        allFishLogs = await fishLogRepository.find({ where: { createdBy: Number(data.id) } });
+        allFishLogs = await fishLogRepository.find({
+          where: { createdBy: data.id },
+        });
       }
 
       return res.status(200).json(allFishLogs);
@@ -77,8 +74,9 @@ export default class FishController {
       const token = req.headers.authorization?.split(' ')[1];
       const data = JSON.parse(await auth.decodeToken(token as string));
       const logId = req.params.id;
-      const fishLogRepository = connection.getRepository(FishLog);
-      const fishLog = await fishLogRepository.findOne({ where: {id: Number(logId)} });
+      const fishLog = await fishLogRepository.findOne({
+        where: { id: logId },
+      });
 
       if (!fishLog) {
         return res.status(404).json({
@@ -104,8 +102,9 @@ export default class FishController {
       const token = req.headers.authorization?.split(' ')[1];
       const data = JSON.parse(await auth.decodeToken(token as string));
       const logId = req.params.id;
-      const fishLogRepository = connection.getRepository(FishLog);
-      const fishLog = await fishLogRepository.findOne({ where: {id: Number(logId)} });
+      const fishLog = await fishLogRepository.findOne({
+        where: { id: logId },
+      });
 
       const newFishLog = req.body;
 
@@ -116,7 +115,8 @@ export default class FishController {
       }
 
       if (
-        data.admin || data.superAdmin ||
+        data.admin ||
+        data.superAdmin ||
         (!fishLog.reviewed && Number(fishLog?.createdBy) === data.id)
       ) {
         try {
@@ -127,8 +127,7 @@ export default class FishController {
             });
           }
 
-          const fishLogRepository = connection.getRepository(FishLog);
-          await fishLogRepository.update({id: Number(logId)}, {...newFishLog});
+          await fishLogRepository.update({ id: logId }, { ...newFishLog });
 
           return res.status(200).json({
             message: 'Registo atualizado com sucesso!',
@@ -155,8 +154,9 @@ export default class FishController {
       const token = req.headers.authorization?.split(' ')[1];
       const data = JSON.parse(await auth.decodeToken(token as string));
       const logId = req.params.id;
-      const fishLogRepository = connection.getRepository(FishLog);
-      const fishLog = await fishLogRepository.findOne({ where: {id: Number(logId)} });
+      const fishLog = await fishLogRepository.findOne({
+        where: { id: logId },
+      });
 
       if (!fishLog) {
         return res.status(404).json({
@@ -165,7 +165,8 @@ export default class FishController {
       }
 
       if (
-        data.admin || data.superAdmin ||
+        data.admin ||
+        data.superAdmin ||
         (!fishLog.reviewed && Number(fishLog?.createdBy) === data.id)
       ) {
         try {
@@ -187,49 +188,6 @@ export default class FishController {
       return res.status(500).json({
         message: 'Falha ao processar requisição',
       });
-    }
-  };
-
-  generateTXT = async (req: Request, res: Response) => {
-    try {
-      const token = req.headers.authorization?.split(' ')[1];
-      const data = JSON.parse(await auth.decodeToken(token as string));
-      const fishLogIds = req.params.id_array;
-
-      const fishLogRepository = connection.getRepository(FishLog);
-
-      const fishIdArray = fishLogIds.split(",");
-      console.log(fishIdArray);
-
-      if (data.admin) {
-        const fishLogArray = [];
-        for await (const el of fishIdArray) {
-          const fishLog = await fishLogRepository.findOneBy({ id: Number(el) });
-          if (fishLog)
-            fishLogArray.push(
-              {
-                "Especie": fishLog.species,
-                "Grande Grupo": fishLog.largeGroup,
-                "Latitude": fishLog.coordenates?.latitude,
-                "Longitude": fishLog.coordenates?.longitude,
-                "Tamanho (cm)": fishLog.length,
-                "Peso (kg)": fishLog.weight,
-              }
-            )
-        }
-
-        console.log('fishlogArray', fishLogArray);
-        const txtFile = generateContentTXT(fishLogArray);
-        console.log('txtfile:', txtFile);
-        
-        res.attachment('Registro.txt');
-        return res.status(200).send(txtFile);
-      }
-      return res.status(401).json({ message: 'Autorização negada!' });
-    } catch (error) {
-      console.log(error);
-      console.log(error);
-      return res.status(500).json({ message: 'Falha na requisição' });
     }
   };
 }
