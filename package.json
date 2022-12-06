@@ -8,7 +8,11 @@
     "start": "NODE_PATH=./build node build/src/server.js",
     "build": "tsc -p .",
     "dev": "nodemon src/server.ts",
-    "lint": "eslint \"**/*.{ts,tsx}\""
+    "lint": "eslint \"**/*.{ts,tsx}\"",
+    "migration:generate": "typeorm-ts-node-commonjs -d ./src/database/index.ts migration:generate src/database/migrations/defaut",
+    "migration:run": "typeorm-ts-node-commonjs -d ./src/database/index.ts migration:run",
+    "migration:revert": "typeorm-ts-node-commonjs -d ./src/database/index.ts migration:revert",
+    "migration:create": "typeorm-ts-node-commonjs migration:create"
   },
   "repository": {
     "type": "git",
@@ -26,8 +30,9 @@
     "@types/jest": "^27.0.1",
     "@types/pg": "^8.6.5",
     "@types/supertest": "^2.0.11",
-    "@typescript-eslint/eslint-plugin": "^4.29.3",
-    "@typescript-eslint/parser": "^4.29.3",
+    "@types/uuid": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^8.3.0",
@@ -39,7 +44,7 @@
     "prettier": "^2.3.2",
     "ts-jest": "^27.0.5",
     "ts-node": "^10.2.0",
-    "typescript": "^4.3.5"
+    "typescript": "^4.6.3"
   },
   "dependencies": {
     "@types/jsonwebtoken": "^8.5.5",
@@ -48,11 +53,11 @@
     "express": "^4.17.1",
     "jest-sonar": "^0.2.12",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.13.8",
     "objects-to-csv": "^1.3.6",
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",
     "supertest": "^6.1.6",
-    "typeorm": "^0.3.3"
+    "typeorm": "^0.3.6",
+    "uuid": "^9.0.0"
   }
 }

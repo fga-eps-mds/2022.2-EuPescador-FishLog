@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { v4 as uuidV4 } from 'uuid';
 
 @Entity('fishLog')
-export class FishLog {
-  @PrimaryGeneratedColumn('increment')
-  id?: number;
+export default class FishLog {
+  @PrimaryColumn()
+  id?: string;
 
   @Column({ nullable: true })
   name?: string;
@@ -20,11 +21,12 @@ export class FishLog {
   @Column({ nullable: true })
   family?: string;
 
-  @Column('simple-json' ,{ nullable: true })
+  @Column('simple-json')
   coordenates?: {
     latitude: number;
     longitude: number;
   };
+
   @Column({ nullable: true })
   photo?: string;
 
@@ -38,7 +40,7 @@ export class FishLog {
   reviewed?: boolean;
 
   @Column({ nullable: true })
-  reviewedBy?: number;
+  reviewedBy?: string;
 
   @Column({ nullable: true })
   visible?: boolean;
@@ -47,17 +49,23 @@ export class FishLog {
   createdAt?: Date;
 
   @Column({ nullable: true })
-  createdBy?: number;
+  createdBy?: string;
 
   @Column({ nullable: true })
   updatedAt?: Date;
 
   @Column({ nullable: true })
-  updatedBy?: number;
+  updatedBy?: string;
 
   @Column({ nullable: true })
   deletedAt?: Date;
 
   @Column({ nullable: true })
-  deletedBy?: number;
+  deletedBy?: string;
+
+  constructor() {
+    if (!this.id) {
+      this.id = uuidV4();
+    }
+  }
 }

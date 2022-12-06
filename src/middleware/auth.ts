@@ -20,7 +20,6 @@ export default class AuthService {
         process.env.AUTH_CONFIG_SECRET as string,
         (error: any) => {
           if (error) {
-            console.log(error);
             res.status(401).json({
               message: 'Token Inválido',
             });
