@@ -32,7 +32,7 @@ export default class FishController {
   getAllFishLogs = async (req: Request, res: Response) => {
     try {
       const token = req.headers.authorization?.split(' ')[1];
-      const data = JSON.parse(await auth.decodeToken(token as string));
+      const data = await auth.decodeToken(token as string);
 
       let allFishLogs: FishLog[] = [];
       allFishLogs = await fishLogRepository.find({
@@ -50,8 +50,7 @@ export default class FishController {
   getAllFishLogsAdmin = async (req: Request, res: Response) => {
     try {
       const token = req.headers.authorization?.split(' ')[1];
-      const data = JSON.parse(await auth.decodeToken(token as string));
-
+      const data = await auth.decodeToken(token as string);
       let allFishLogs: FishLog[] = [];
       if (data.admin || data.superAdmin) {
         allFishLogs = await fishLogRepository.find();
@@ -72,7 +71,7 @@ export default class FishController {
   getOneFishLog = async (req: Request, res: Response) => {
     try {
       const token = req.headers.authorization?.split(' ')[1];
-      const data = JSON.parse(await auth.decodeToken(token as string));
+      const data = await auth.decodeToken(token as string);
       const logId = req.params.id;
       const fishLog = await fishLogRepository.findOne({
         where: { id: logId },
@@ -100,7 +99,7 @@ export default class FishController {
   updateFishLog = async (req: Request, res: Response) => {
     try {
       const token = req.headers.authorization?.split(' ')[1];
-      const data = JSON.parse(await auth.decodeToken(token as string));
+      const data = await auth.decodeToken(token as string);
       const logId = req.params.id;
       const fishLog = await fishLogRepository.findOne({
         where: { id: logId },
@@ -117,7 +116,7 @@ export default class FishController {
       if (
         data.admin ||
         data.superAdmin ||
-        (!fishLog.reviewed && Number(fishLog?.createdBy) === data.id)
+        (!fishLog.reviewed && fishLog?.createdBy === data.id)
       ) {
         try {
           if (!(req.body.name || req.body.species || req.body.photo)) {
@@ -152,7 +151,7 @@ export default class FishController {
   deleteFishLog = async (req: Request, res: Response) => {
     try {
       const token = req.headers.authorization?.split(' ')[1];
-      const data = JSON.parse(await auth.decodeToken(token as string));
+      const data = await auth.decodeToken(token as string);
       const logId = req.params.id;
       const fishLog = await fishLogRepository.findOne({
         where: { id: logId },
@@ -167,7 +166,7 @@ export default class FishController {
       if (
         data.admin ||
         data.superAdmin ||
-        (!fishLog.reviewed && Number(fishLog?.createdBy) === data.id)
+        (!fishLog.reviewed && fishLog?.createdBy === data.id)
       ) {
         try {
           await fishLogRepository.remove(fishLog);

@@ -1,33 +1,41 @@
 import { Request, Response } from 'express';
-import * as jwt from 'jsonwebtoken';
+import { decode } from 'jsonwebtoken';
+
+import axios from 'axios';
+
+interface Idata {
+  id: string;
+  admin: boolean;
+  superAdmin: boolean;
+}
 
 export default class AuthService {
   decodeToken = async (token: string) => {
-    const data = Buffer.from(token.split('.')[1], 'base64').toString();
-    return data;
+    const decodeToken = decode(token) as Idata;
+
+    return decodeToken;
   };
 
-  authorize = (req: Request, res: Response, next: () => void) => {
-    const token = req.headers.authorization?.split(' ')[1];
-
-    if (!token) {
-      res.status(401).json({
-        message: 'Acesso Restrito',
+  authorize = async (req: Request, res: Response, next: () => void) => {
+    const token = req.headers.authorization;
+    try {
+      await axios.get(String(`${process.env.USER_API_URL}/authToken`), {
+        headers: {
+          Accept: 'application/json',
+          authorization: token,
+        },
       });
-    } else {
-      jwt.verify(
-        token,
-        process.env.AUTH_CONFIG_SECRET as string,
-        (error: any) => {
-          if (error) {
-            res.status(401).json({
-              message: 'Token Inválido',
-            });
-          } else {
-            next();
-          }
-        }
-      );
+      next();
+    } catch (error: any) {
+      if(error.response){
+        const { response } = error;
+        
+        res.status(response.status).json(response.data);
+      }
+      
+      res.status(500).json({message:
+        'User API not found'
+      });
     }
   };
 }
