@@ -2,6 +2,9 @@ export default {
   clearMocks: true,
   coverageProvider: 'v8',
   preset: 'ts-jest',
+  moduleNameMapper: {
+    axios: 'axios/dist/node/axios.cjs',
+  },
   reporters: [
     'default',
     [

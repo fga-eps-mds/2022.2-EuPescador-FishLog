@@ -186,6 +186,45 @@ describe('Test Get All FishLogs function', () => {
   });
 });
 
+describe('Test Get All FishLogs Admin function', () => {
+  it('should get a statusCode 200 with admin request and get all fishlogs', async () => {
+    const mockRequest = {} as Request;
+    const fishLogRepository = connection.getRepository(FishLog);
+    mockRequest.query = {};
+    mockRequest.headers = {
+      authorization:
+        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxMzIzYmJhZGM0ZDAxMDAyMjU3ODJmMCIsImVtYWlsIjoibmF0YW5AZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmEkMTAkWDZtZ0cwZ0JhQzAwMHhHV1pIbVJrdTdVZkpZbHNxMS9La1hRMDBtdVdtLzdhdlhoanZ4UjIiLCJhZG1pbiI6dHJ1ZSwiaWF0IjoxNjMwNjk4Mjg0LCJleHAiOjE2MzA3ODQ2ODR9.uDsTpUWS-R47UquW044GjSdDXR1bgSw5GU7WGM6IIuI',
+    };
+    const response = mockResponse();
+    fishLogRepository.find = jest.fn().mockResolvedValueOnce([fishMock]);
+    const res = await fishLogController.getAllFishLogsAdmin(
+      mockRequest,
+      response
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should get a statusCode 500 if request failed', async () => {
+    const mockRequest = {} as Request;
+    const fishLogRepository = connection.getRepository(FishLog);
+    mockRequest.headers = {
+      authorization:
+        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxMzIzYzM3ZGM0ZDAxMDAyMjU3ODJmOCIsImVtYWlsIjoibmF0YW5lZUBnbWFpbC5jb20iLCJwYXNzd29yZCI6IiQyYSQxMCRpQldyTk1yd3RKZEliOG5ibGZJZkVlY0cucjY0dFR3SkltRFhkQW9HYkc3b3M2UzUvUzNNNiIsImFkbWluIjpmYWxzZSwiaWF0IjoxNjMwNjk4MTAzLCJleHAiOjE2MzA3ODQ1MDN9.B4nEuDFmC4TRMY57nIWyg46loniEAzjn7PJAapwAuXc',
+    };
+    const response = mockResponse();
+    fishLogRepository.find = jest
+      .fn()
+      .mockImplementationOnce(() =>
+        Promise.reject(Error('Falha na requisição!'))
+      );
+    const res = await fishLogController.getAllFishLogsAdmin(
+      mockRequest,
+      response
+    );
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+});
+
 describe('Test Get One FishLog function', () => {
   it('should get a statusCode 200 with admin request', async () => {
     const mockRequest = {} as Request;
@@ -217,6 +256,22 @@ describe('Test Get One FishLog function', () => {
     fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
     const res = await fishLogController.getOneFishLog(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should get a statusCode 401 with user not authozized', async () => {
+    const mockRequest = {} as Request;
+    const fishLogRepository = connection.getRepository(FishLog);
+    mockRequest.headers = {
+      authorization:
+        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdlMTM0ZWYzLWUzZWItNDk4YS1hYjcyLWQ2NjFkZjAxODVkYSIsImFkbWluIjpmYWxzZSwic3VwZXJBZG1pbiI6ZmFsc2UsImlhdCI6MTY3MDcyNjUxNiwiZXhwIjoxNjczMzE4NTE2LCJzdWIiOiI3ZTEzNGVmMy1lM2ViLTQ5OGEtYWI3Mi1kNjYxZGYwMTg1ZGEifQ.z8HCPimk4BpJZvUlpg5420f56A1YKvOBK-gjo0IYkyc',
+    };
+    mockRequest.params = {
+      id: '3472417428',
+    };
+    const response = mockResponse();
+    fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
+    const res = await fishLogController.getOneFishLog(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(401);
   });
 
   it('should get a statusCode 404 if fishlog not found', async () => {
@@ -308,6 +363,27 @@ describe('Test delete FishLog function', () => {
     fishLogRepository.remove = jest.fn().mockResolvedValueOnce({});
     const res = await fishLogController.deleteFishLog(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should get a statusCode 500 with admin request', async () => {
+    const mockRequest = {} as Request;
+    const fishLogRepository = connection.getRepository(FishLog);
+    mockRequest.headers = {
+      authorization:
+        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxMzIzYmJhZGM0ZDAxMDAyMjU3ODJmMCIsImVtYWlsIjoibmF0YW5AZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmEkMTAkWDZtZ0cwZ0JhQzAwMHhHV1pIbVJrdTdVZkpZbHNxMS9La1hRMDBtdVdtLzdhdlhoanZ4UjIiLCJhZG1pbiI6dHJ1ZSwiaWF0IjoxNjMwNjk4Mjg0LCJleHAiOjE2MzA3ODQ2ODR9.uDsTpUWS-R47UquW044GjSdDXR1bgSw5GU7WGM6IIuI',
+    };
+    mockRequest.params = {
+      id: '3472417428',
+    };
+    const response = mockResponse();
+    fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
+    jest
+      .spyOn(fishLogRepository, 'remove')
+      .mockImplementationOnce(() =>
+        Promise.reject(Error('Falha no sistema de criação de registro'))
+      );
+    const res = await fishLogController.deleteFishLog(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(500);
   });
 
   it('should get a statusCode 404 if fishlog not found', async () => {
