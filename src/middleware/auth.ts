@@ -27,15 +27,12 @@ export default class AuthService {
       });
       next();
     } catch (error: any) {
-      if(error.response){
+      if (error.response) {
         const { response } = error;
-        
         res.status(response.status).json(response.data);
       }
-      
-      res.status(500).json({message:
-        'User API not found'
-      });
+
+      res.status(500).json({ message: 'User API not found' });
     }
   };
 }
