@@ -1,34 +1,31 @@
 import { Request, Response, Router } from 'express';
 import FishController from '../controllers/fishLogController';
-import AuthService from '../middleware/auth';
-
-const auth = new AuthService();
 
 const fishLogRoutes = Router();
 
 const fishLogController = new FishController();
 
-fishLogRoutes.post('/', auth.authorize, (req: Request, res: Response) => {
+fishLogRoutes.post('/', (req: Request, res: Response) => {
   fishLogController.createFishLog(req, res);
 });
 
-fishLogRoutes.get('/', auth.authorize, (req: Request, res: Response) => {
+fishLogRoutes.get('/', (req: Request, res: Response) => {
   fishLogController.getAllFishLogs(req, res);
 });
 
-fishLogRoutes.get('/all', auth.authorize, (req: Request, res: Response) => {
+fishLogRoutes.get('/all', (req: Request, res: Response) => {
   fishLogController.getAllFishLogsAdmin(req, res);
 });
 
-fishLogRoutes.get('/:id', auth.authorize, (req: Request, res: Response) => {
+fishLogRoutes.get('/:id', (req: Request, res: Response) => {
   fishLogController.getOneFishLog(req, res);
 });
 
-fishLogRoutes.patch('/:id', auth.authorize, (req: Request, res: Response) => {
+fishLogRoutes.patch('/:id', (req: Request, res: Response) => {
   fishLogController.updateFishLog(req, res);
 });
 
-fishLogRoutes.delete('/:id', auth.authorize, (req: Request, res: Response) => {
+fishLogRoutes.delete('/:id', (req: Request, res: Response) => {
   fishLogController.deleteFishLog(req, res);
 });
 
