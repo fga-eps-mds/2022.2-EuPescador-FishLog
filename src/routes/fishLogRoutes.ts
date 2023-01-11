@@ -1,5 +1,8 @@
 import { Request, Response, Router } from 'express';
 import FishController from '../controllers/fishLogController';
+import AuthService from '../middleware/auth';
+
+const authService = new AuthService();
 
 const fishLogRoutes = Router();
 
@@ -13,9 +16,13 @@ fishLogRoutes.get('/', (req: Request, res: Response) => {
   fishLogController.getAllFishLogs(req, res);
 });
 
-fishLogRoutes.get('/all', (req: Request, res: Response) => {
-  fishLogController.getAllFishLogsAdmin(req, res);
-});
+fishLogRoutes.get(
+  '/all',
+  authService.authorize,
+  (req: Request, res: Response) => {
+    fishLogController.getAllFishLogsAdmin(req, res);
+  }
+);
 
 fishLogRoutes.get('/:id', (req: Request, res: Response) => {
   fishLogController.getOneFishLog(req, res);

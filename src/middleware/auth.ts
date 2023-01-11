@@ -9,6 +9,10 @@ interface Idata {
   superAdmin: boolean;
 }
 
+interface RequestWithUserRole extends Request {
+  user?: Idata;
+}
+
 export default class AuthService {
   decodeToken = async (token: string) => {
     const decodeToken = decode(token) as Idata;
@@ -16,23 +20,30 @@ export default class AuthService {
     return decodeToken;
   };
 
-  authorize = async (req: Request, res: Response, next: () => void) => {
-    const token = req.headers.authorization;
+  authorize = async (
+    req: RequestWithUserRole,
+    res: Response,
+    next: () => void
+  ) => {
     try {
-      await axios.get(String(`${process.env.USER_API_URL}/authToken`), {
+      const token = req.headers.authorization;
+      const url = `${process.env.USER_API_URL}/authToken`;
+      await axios.get(url, {
         headers: {
           Accept: 'application/json',
           authorization: token,
         },
       });
+
+      req.user = await this.decodeToken(token as string);
       next();
+      return null;
     } catch (error: any) {
       if (error.response) {
         const { response } = error;
-        res.status(response.status).json(response.data);
+        return res.status(response.status).json(response.data);
       }
-
-      res.status(500).json({ message: 'User API not found' });
+      return res.status(500).json({ message: 'User API not found' });
     }
   };
 }
