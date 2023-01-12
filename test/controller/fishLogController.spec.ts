@@ -2,6 +2,7 @@ import { Response, Request } from 'express';
 import FishLogController from '../../src/controllers/fishLogController';
 import FishLog from '../../src/database/entities/fishLog';
 import { connection } from '../../src/database';
+import { RequestWithUserRole } from '../../src/Interface/fishLogInterfaces';
 
 const fishLogController = new FishLogController();
 const fishMock = {
@@ -11,6 +12,7 @@ const fishMock = {
   reviewed: false,
   createdBy: '61323c37dc4d0100225782f8',
 };
+
 const mockResponse = () => {
   const response = {} as Response;
   response.status = jest.fn().mockReturnValue(response);
@@ -220,13 +222,19 @@ describe('Test Get All FishLogs Admin function', () => {
 
 describe('Test Get One FishLog function', () => {
   it('should get a statusCode 200 with admin request', async () => {
-    const mockRequest = {} as Request;
+    const mockRequest = {} as RequestWithUserRole;
     const fishLogRepository = connection.getRepository(FishLog);
     mockRequest.headers = {
       authorization: 'Bearer mockToken',
     };
     mockRequest.params = {
       id: '3472417428',
+    };
+
+    mockRequest.user = {
+      id: '3472417428',
+      admin: true,
+      superAdmin: true,
     };
     const response = mockResponse();
     fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
@@ -235,13 +243,19 @@ describe('Test Get One FishLog function', () => {
   });
 
   it('should get a statusCode 200 with author request', async () => {
-    const mockRequest = {} as Request;
+    const mockRequest = {} as RequestWithUserRole;
     const fishLogRepository = connection.getRepository(FishLog);
     mockRequest.headers = {
       authorization: 'Bearer mockToken',
     };
     mockRequest.params = {
       id: '3472417428',
+    };
+
+    mockRequest.user = {
+      id: '3472417428',
+      admin: true,
+      superAdmin: true,
     };
     const response = mockResponse();
     fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
@@ -250,10 +264,12 @@ describe('Test Get One FishLog function', () => {
   });
 
   it('should get a statusCode 401 with user not authozized', async () => {
-    const mockRequest = {} as Request;
+    const mockRequest = {} as RequestWithUserRole;
     const fishLogRepository = connection.getRepository(FishLog);
-    mockRequest.headers = {
-      authorization: 'Bearer mockToken',
+    mockRequest.user = {
+      id: '123',
+      admin: false,
+      superAdmin: false,
     };
     mockRequest.params = {
       id: '3472417428',
@@ -265,10 +281,12 @@ describe('Test Get One FishLog function', () => {
   });
 
   it('should get a statusCode 404 if fishlog not found', async () => {
-    const mockRequest = {} as Request;
+    const mockRequest = {} as RequestWithUserRole;
     const fishLogRepository = connection.getRepository(FishLog);
-    mockRequest.headers = {
-      authorization: 'Bearer mockToken',
+    mockRequest.user = {
+      id: '3472417428',
+      admin: false,
+      superAdmin: false,
     };
     mockRequest.params = {
       id: '3472417428',
@@ -280,13 +298,15 @@ describe('Test Get One FishLog function', () => {
   });
 
   it('should get a statusCode 401 if user is not the author', async () => {
-    const mockRequest = {} as Request;
+    const mockRequest = {} as RequestWithUserRole;
     const fishLogRepository = connection.getRepository(FishLog);
-    mockRequest.headers = {
-      authorization: 'Bearer mockToken',
+    mockRequest.user = {
+      id: '123',
+      admin: false,
+      superAdmin: false,
     };
     mockRequest.params = {
-      id: '3472417428',
+      id: '61323c37dc4d0100225782f8',
     };
     const response = mockResponse();
     fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
@@ -336,14 +356,18 @@ describe('Test update FishLog function', () => {
 
 describe('Test delete FishLog function', () => {
   it('should get a statusCode 200 with admin request', async () => {
-    const mockRequest = {} as Request;
-    const fishLogRepository = connection.getRepository(FishLog);
-    mockRequest.headers = {
-      authorization: 'Bearer mockToken',
+    const mockRequest = {} as RequestWithUserRole;
+    mockRequest.user = {
+      id: '3472417428',
+      admin: true,
+      superAdmin: true,
     };
+    const fishLogRepository = connection.getRepository(FishLog);
+
     mockRequest.params = {
       id: '3472417428',
     };
+
     const response = mockResponse();
     fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
     fishLogRepository.remove = jest.fn().mockResolvedValueOnce({});
@@ -352,13 +376,17 @@ describe('Test delete FishLog function', () => {
   });
 
   it('should get a statusCode 500 with admin request', async () => {
-    const mockRequest = {} as Request;
+    const mockRequest = {} as RequestWithUserRole;
     const fishLogRepository = connection.getRepository(FishLog);
-    mockRequest.headers = {
-      authorization: 'Bearer mockToken',
-    };
+
     mockRequest.params = {
       id: '3472417428',
+    };
+
+    mockRequest.user = {
+      id: '3472417428',
+      admin: true,
+      superAdmin: true,
     };
     const response = mockResponse();
     fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);

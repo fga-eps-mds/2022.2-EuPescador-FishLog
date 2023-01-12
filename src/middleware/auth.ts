@@ -6,12 +6,6 @@ import axios from 'axios';
 import { RequestWithUserRole, Idata } from '../Interface/fishLogInterfaces';
 
 export default class AuthService {
-  decodeToken = async (token: string) => {
-    const decodeToken = decode(token) as Idata;
-
-    return decodeToken;
-  };
-
   authorize = async (
     req: RequestWithUserRole,
     res: Response,

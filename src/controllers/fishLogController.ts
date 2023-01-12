@@ -68,9 +68,9 @@ export default class FishController {
       const { id } = req.params;
       const fishLog = await fishLogRepository.findOne({ where: { id } });
       if (
-        !req.user?.admin ||
-        fishLog?.createdBy !== req.user?.id ||
-        !req.user?.superAdmin
+        req.user?.admin ||
+        fishLog?.createdBy === req.user?.id ||
+        req.user?.superAdmin
       ) {
         return res.status(200).json(fishLog);
       }
@@ -85,7 +85,6 @@ export default class FishController {
         message: 'Você não tem permissão para ver esse registro',
       });
     } catch (error) {
-      console.log(error);
       return res.status(500).json({
         message: 'Falha ao processar requisição',
       });
@@ -106,7 +105,6 @@ export default class FishController {
           message: 'Relatório não encontrado',
         });
       }
-
       if (
         req.user?.admin ||
         req.user?.superAdmin ||
