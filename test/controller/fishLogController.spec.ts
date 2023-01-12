@@ -344,11 +344,102 @@ describe('Test update FishLog function', () => {
     expect(res.status).toHaveBeenCalledWith(404);
   });
 
+  it('should get a statusCode 401 if have unathorized', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    const fishLogRepository = connection.getRepository(FishLog);
+    mockRequest.body = {
+      id: '61323c37dc4d0100225782f8',
+      specie: 'bb',
+    };
+    mockRequest.user = {
+      id: '123',
+      admin: false,
+      superAdmin: false,
+    };
+    mockRequest.params = {
+      id: '3472417428',
+    };
+    const response = mockResponse();
+    fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
+    const res = await fishLogController.updateFishLog(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('should get a statusCode 400', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    const fishLogRepository = connection.getRepository(FishLog);
+    mockRequest.body = {
+      id: '61323c37dc4d0100225782f8',
+    };
+    mockRequest.user = {
+      id: '123',
+      admin: true,
+      superAdmin: true,
+    };
+    mockRequest.params = {
+      id: '3472417428',
+    };
+    const response = mockResponse();
+    fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
+    const res = await fishLogController.updateFishLog(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  it('should get a statusCode 200 if update user', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    const fishLogRepository = connection.getRepository(FishLog);
+    mockRequest.body = {
+      id: '61323c37dc4d0100225782f8',
+      name: 'nome',
+      species: 'species',
+      photo: 'photo',
+    };
+    mockRequest.user = {
+      id: '123',
+      admin: true,
+      superAdmin: true,
+    };
+    mockRequest.params = {
+      id: '3472417428',
+    };
+    const response = mockResponse();
+    fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
+    fishLogRepository.update = jest.fn().mockResolvedValueOnce(fishMock);
+    const res = await fishLogController.updateFishLog(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
   it('should get a statusCode 500 if request failed', async () => {
     const mockRequest = {} as Request;
     const fishLogRepository = connection.getRepository(FishLog);
     const response = mockResponse();
     fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
+    const res = await fishLogController.updateFishLog(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it('should get a statusCode 200 if update user', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    const fishLogRepository = connection.getRepository(FishLog);
+    mockRequest.body = {
+      id: '61323c37dc4d0100225782f8',
+      name: 'nome',
+      species: 'species',
+      photo: 'photo',
+    };
+    mockRequest.user = {
+      id: '123',
+      admin: true,
+      superAdmin: true,
+    };
+    mockRequest.params = {
+      id: '3472417428',
+    };
+    const response = mockResponse();
+    fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
+    fishLogRepository.update = jest
+      .fn()
+      .mockResolvedValueOnce(Promise.reject());
     const res = await fishLogController.updateFishLog(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(500);
   });
