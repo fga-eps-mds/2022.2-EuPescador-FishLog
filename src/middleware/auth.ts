@@ -1,17 +1,9 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { decode } from 'jsonwebtoken';
 
 import axios from 'axios';
 
-interface Idata {
-  id: string;
-  admin: boolean;
-  superAdmin: boolean;
-}
-
-interface RequestWithUserRole extends Request {
-  user?: Idata;
-}
+import { RequestWithUserRole, Idata } from '../Interface/fishLogInterfaces';
 
 export default class AuthService {
   decodeToken = async (token: string) => {
@@ -26,16 +18,16 @@ export default class AuthService {
     next: () => void
   ) => {
     try {
-      const token = req.headers.authorization;
+      const token = req.headers.authorization?.split(' ')[1] as string;
       const url = `${process.env.USER_API_URL}/authToken`;
       await axios.get(url, {
         headers: {
           Accept: 'application/json',
-          authorization: token,
+          authorization: `Bearer ${token}`,
         },
       });
 
-      req.user = await this.decodeToken(token as string);
+      req.user = decode(token) as Idata;
       next();
       return null;
     } catch (error: any) {
