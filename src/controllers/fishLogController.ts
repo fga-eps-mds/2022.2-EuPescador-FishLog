@@ -2,10 +2,8 @@ import { Request, Response } from 'express';
 import { v4 as uuidV4 } from 'uuid';
 import FishLog from '../database/entities/fishLog';
 import { connection } from '../database';
-import AuthService from '../middleware/auth';
 import { RequestWithUserRole } from '../Interface/fishLogInterfaces';
 
-const auth = new AuthService();
 const fishLogRepository = connection.getRepository(FishLog);
 
 export default class FishController {
