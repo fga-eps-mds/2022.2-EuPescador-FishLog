@@ -2,9 +2,8 @@ import { Request, Response } from 'express';
 import { v4 as uuidV4 } from 'uuid';
 import FishLog from '../database/entities/fishLog';
 import { connection } from '../database';
-import AuthService from '../middleware/auth';
+import { RequestWithUserRole } from '../Interface/fishLogInterfaces';
 
-const auth = new AuthService();
 const fishLogRepository = connection.getRepository(FishLog);
 
 export default class FishController {
@@ -29,14 +28,10 @@ export default class FishController {
     }
   };
 
-  getAllFishLogs = async (req: Request, res: Response) => {
+  getAllFishLogs = async (req: RequestWithUserRole, res: Response) => {
     try {
-      const token = req.headers.authorization?.split(' ')[1];
-      const data = await auth.decodeToken(token as string);
-
-      let allFishLogs: FishLog[] = [];
-      allFishLogs = await fishLogRepository.find({
-        where: { createdBy: data.id },
+      const allFishLogs = await fishLogRepository.find({
+        where: { createdBy: req.user?.id },
       });
 
       return res.status(200).json(allFishLogs);
@@ -47,16 +42,14 @@ export default class FishController {
     }
   };
 
-  getAllFishLogsAdmin = async (req: Request, res: Response) => {
+  getAllFishLogsAdmin = async (req: RequestWithUserRole, res: Response) => {
     try {
-      const token = req.headers.authorization?.split(' ')[1];
-      const data = await auth.decodeToken(token as string);
       let allFishLogs: FishLog[] = [];
-      if (data.admin || data.superAdmin) {
+      if (req.user?.admin || req.user?.superAdmin) {
         allFishLogs = await fishLogRepository.find();
       } else {
         allFishLogs = await fishLogRepository.find({
-          where: { createdBy: data.id },
+          where: { createdBy: req.user?.id },
         });
       }
 
@@ -68,14 +61,17 @@ export default class FishController {
     }
   };
 
-  getOneFishLog = async (req: Request, res: Response) => {
+  getOneFishLog = async (req: RequestWithUserRole, res: Response) => {
     try {
-      const token = req.headers.authorization?.split(' ')[1];
-      const data = await auth.decodeToken(token as string);
-      const logId = req.params.id;
-      const fishLog = await fishLogRepository.findOne({
-        where: { id: logId },
-      });
+      const { id } = req.params;
+      const fishLog = await fishLogRepository.findOne({ where: { id } });
+      if (
+        req.user?.admin ||
+        fishLog?.createdBy === req.user?.id ||
+        req.user?.superAdmin
+      ) {
+        return res.status(200).json(fishLog);
+      }
 
       if (!fishLog) {
         return res.status(404).json({
@@ -83,9 +79,6 @@ export default class FishController {
         });
       }
 
-      if (data.admin || fishLog?.createdBy === data.id || data.superAdmin) {
-        return res.status(200).json(fishLog);
-      }
       return res.status(401).json({
         message: 'Você não tem permissão para ver esse registro',
       });
@@ -96,10 +89,8 @@ export default class FishController {
     }
   };
 
-  updateFishLog = async (req: Request, res: Response) => {
+  updateFishLog = async (req: RequestWithUserRole, res: Response) => {
     try {
-      const token = req.headers.authorization?.split(' ')[1];
-      const data = await auth.decodeToken(token as string);
       const logId = req.params.id;
       const fishLog = await fishLogRepository.findOne({
         where: { id: logId },
@@ -112,11 +103,10 @@ export default class FishController {
           message: 'Relatório não encontrado',
         });
       }
-
       if (
-        data.admin ||
-        data.superAdmin ||
-        (!fishLog.reviewed && fishLog?.createdBy === data.id)
+        req.user?.admin ||
+        req.user?.superAdmin ||
+        (!fishLog.reviewed && fishLog?.createdBy === req.user?.id)
       ) {
         try {
           if (!(req.body.name || req.body.species || req.body.photo)) {
@@ -148,11 +138,10 @@ export default class FishController {
     }
   };
 
-  deleteFishLog = async (req: Request, res: Response) => {
+  deleteFishLog = async (req: RequestWithUserRole, res: Response) => {
     try {
-      const token = req.headers.authorization?.split(' ')[1];
-      const data = await auth.decodeToken(token as string);
       const logId = req.params.id;
+
       const fishLog = await fishLogRepository.findOne({
         where: { id: logId },
       });
@@ -164,9 +153,9 @@ export default class FishController {
       }
 
       if (
-        data.admin ||
-        data.superAdmin ||
-        (!fishLog.reviewed && fishLog?.createdBy === data.id)
+        req.user?.admin ||
+        req.user?.superAdmin ||
+        (!fishLog.reviewed && fishLog?.createdBy === req.user?.id)
       ) {
         try {
           await fishLogRepository.remove(fishLog);
