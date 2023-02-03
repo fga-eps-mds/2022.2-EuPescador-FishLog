@@ -1,13 +1,18 @@
-import { Request, Response } from 'express';
+/* eslint-disable no-restricted-syntax */
+import { Response } from 'express';
 import { v4 as uuidV4 } from 'uuid';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import FishLog from '../database/entities/fishLog';
 import { connection } from '../database';
 import { RequestWithUserRole } from '../Interface/fishLogInterfaces';
+import coordenatesFake from '../utils/coordenatesFake';
 
+dayjs.extend(utc);
 const fishLogRepository = connection.getRepository(FishLog);
 
 export default class FishController {
-  createFishLog = async (req: Request, res: Response) => {
+  createFishLog = async (req: RequestWithUserRole, res: Response) => {
     try {
       if (!(req.body.name || req.body.species || req.body.photo)) {
         return res.status(400).json({
@@ -15,11 +20,32 @@ export default class FishController {
             'Registro não foi criado, é necessário o nome, a espécie ou a foto para a criação de um registro.',
         });
       }
+
+      req.body.coordenatesFake = {
+        latitude: coordenatesFake(req.body.coordenates.latitude),
+        longitude: coordenatesFake(req.body.coordenates.longitude),
+      };
+      req.body.visible = false;
+      req.body.createdBy = req.user?.id;
+
+      if (req.body.date && req.body.hour) {
+        const date = req.body.date.split('/');
+        req.body.createdAt = dayjs(
+          `${date[2]}-${date[1]}-${date[0]} ${req.body.hour}`
+        ).toDate();
+      } else {
+        req.body.createdAt = dayjs();
+      }
+
       const fish = await fishLogRepository.save({
         id: uuidV4(),
         ...req.body,
       });
-
+      delete fish.updatedAt;
+      delete fish.createdAt;
+      delete fish.createdBy;
+      delete fish.visible;
+      delete fish.coordenatesFake;
       return res.status(200).json({ fish });
     } catch (error) {
       return res.status(500).json({
@@ -31,8 +57,13 @@ export default class FishController {
   getAllFishLogs = async (req: RequestWithUserRole, res: Response) => {
     try {
       const allFishLogs = await fishLogRepository.find({
-        where: { createdBy: req.user?.id },
+        where: [{ createdBy: req.user?.id }, { visible: true }],
       });
+
+      for (const data of allFishLogs) {
+        data.coordenates = data.coordenatesFake;
+        delete data.coordenatesFake;
+      }
 
       return res.status(200).json(allFishLogs);
     } catch (error) {
@@ -49,8 +80,13 @@ export default class FishController {
         allFishLogs = await fishLogRepository.find();
       } else {
         allFishLogs = await fishLogRepository.find({
-          where: { createdBy: req.user?.id },
+          where: [{ createdBy: req.user?.id }, { visible: true }],
         });
+
+        for (const data of allFishLogs) {
+          data.coordenates = data.coordenatesFake;
+          delete data.coordenatesFake;
+        }
       }
 
       return res.status(200).json(allFishLogs);
@@ -106,7 +142,7 @@ export default class FishController {
       if (
         req.user?.admin ||
         req.user?.superAdmin ||
-        (!fishLog.reviewed && fishLog?.createdBy === req.user?.id)
+        fishLog?.createdBy === req.user?.id
       ) {
         try {
           if (!(req.body.name || req.body.species || req.body.photo)) {
@@ -155,7 +191,7 @@ export default class FishController {
       if (
         req.user?.admin ||
         req.user?.superAdmin ||
-        (!fishLog.reviewed && fishLog?.createdBy === req.user?.id)
+        fishLog?.createdBy === req.user?.id
       ) {
         try {
           await fishLogRepository.remove(fishLog);
