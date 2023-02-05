@@ -45,6 +45,58 @@ describe('Test Create FishLog function', () => {
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
+  it('should get a statusCode 200 providing species', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    const fishLogRepository = connection.getRepository(FishLog);
+
+    mockRequest.user = {
+      id: '1',
+      admin: true,
+      superAdmin: true,
+    };
+    mockRequest.body = {
+      id: '1',
+      species: 'aa',
+      coordenates: {
+        latitude: 1,
+        longitude: 2,
+      },
+    };
+
+    const response = mockResponse();
+    jest
+      .spyOn(fishLogRepository, 'save')
+      .mockImplementationOnce(() =>
+        Promise.resolve({ id: 'c465c64d-0820-49d8-bbdd-02bc3c05c545' })
+      );
+    const res = await fishLogController.createFishLog(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should get a statusCode 200 providing species with date', async () => {
+    const mockRequest = {} as Request;
+    const fishLogRepository = connection.getRepository(FishLog);
+    mockRequest.body = {
+      id: '1',
+      date: '01/01/01',
+      hour: '00:00',
+      species: 'aa',
+      coordenates: {
+        latitude: 1,
+        longitude: 2,
+      },
+    };
+
+    const response = mockResponse();
+    jest
+      .spyOn(fishLogRepository, 'save')
+      .mockImplementationOnce(() =>
+        Promise.resolve({ id: 'c465c64d-0820-49d8-bbdd-02bc3c05c545' })
+      );
+    const res = await fishLogController.createFishLog(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
   it('should get a statusCode 400', async () => {
     const mockRequest = {} as Request;
     mockRequest.body = {
@@ -83,8 +135,7 @@ describe('Test Get All FishLogs function', () => {
     const fishLogRepository = connection.getRepository(FishLog);
     mockRequest.query = {};
     mockRequest.headers = {
-      authorization:
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxMzIzYmJhZGM0ZDAxMDAyMjU3ODJmMCIsImVtYWlsIjoibmF0YW5AZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmEkMTAkWDZtZ0cwZ0JhQzAwMHhHV1pIbVJrdTdVZkpZbHNxMS9La1hRMDBtdVdtLzdhdlhoanZ4UjIiLCJhZG1pbiI6dHJ1ZSwiaWF0IjoxNjMwNjk4Mjg0LCJleHAiOjE2MzA3ODQ2ODR9.uDsTpUWS-R47UquW044GjSdDXR1bgSw5GU7WGM6IIuI',
+      authorization: 'Bearer mockToken',
     };
     const response = mockResponse();
     fishLogRepository.find = jest.fn().mockResolvedValueOnce([fishMock]);
@@ -93,14 +144,30 @@ describe('Test Get All FishLogs function', () => {
   });
 
   it('should get a statusCode 200 with admin request and get reviewed fishlogs', async () => {
-    const mockRequest = {} as Request;
+    const mockRequest = {} as RequestWithUserRole;
     const fishLogRepository = connection.getRepository(FishLog);
     mockRequest.query = {
       status: 'reviewed',
     };
     mockRequest.headers = {
-      authorization:
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxMzIzYmJhZGM0ZDAxMDAyMjU3ODJmMCIsImVtYWlsIjoibmF0YW5AZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmEkMTAkWDZtZ0cwZ0JhQzAwMHhHV1pIbVJrdTdVZkpZbHNxMS9La1hRMDBtdVdtLzdhdlhoanZ4UjIiLCJhZG1pbiI6dHJ1ZSwiaWF0IjoxNjMwNjk4Mjg0LCJleHAiOjE2MzA3ODQ2ODR9.uDsTpUWS-R47UquW044GjSdDXR1bgSw5GU7WGM6IIuI',
+      authorization: 'Bearer mockToken',
+    };
+    const response = mockResponse();
+    fishLogRepository.find = jest.fn().mockResolvedValueOnce([fishMock]);
+    const res = await fishLogController.getAllFishLogs(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should get a statusCode 200 with admin request and get createdBy fishlogs', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    const fishLogRepository = connection.getRepository(FishLog);
+    mockRequest.user = {
+      id: '61323bbadc4d0100225782f0',
+      admin: true,
+      superAdmin: false,
+    };
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
     };
     const response = mockResponse();
     fishLogRepository.find = jest.fn().mockResolvedValueOnce([fishMock]);
@@ -185,9 +252,69 @@ describe('Test Get All FishLogs function', () => {
 
 describe('Test Get All FishLogs Admin function', () => {
   it('should get a statusCode 200 with admin request and get all fishlogs', async () => {
-    const mockRequest = {} as Request;
+    const mockRequest = {} as RequestWithUserRole;
     const fishLogRepository = connection.getRepository(FishLog);
-    mockRequest.query = {};
+    mockRequest.user = {
+      id: '3472417428',
+      admin: true,
+      superAdmin: false,
+    };
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
+    };
+    const response = mockResponse();
+    fishLogRepository.find = jest.fn().mockResolvedValueOnce([fishMock]);
+    const res = await fishLogController.getAllFishLogsAdmin(
+      mockRequest,
+      response
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should get a statusCode 200 with admin request and get all fishlogs', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    const fishLogRepository = connection.getRepository(FishLog);
+    mockRequest.user = {
+      id: '3472417428',
+      admin: false,
+      superAdmin: false,
+    };
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
+    };
+    const response = mockResponse();
+    fishLogRepository.find = jest.fn().mockResolvedValueOnce([fishMock]);
+    const res = await fishLogController.getAllFishLogsAdmin(
+      mockRequest,
+      response
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should get a statusCode 200 with admin request and get all fishlogs', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    const fishLogRepository = connection.getRepository(FishLog);
+    mockRequest.user = {
+      id: '3472417428',
+      admin: false,
+      superAdmin: true,
+    };
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
+    };
+    const response = mockResponse();
+    fishLogRepository.find = jest.fn().mockResolvedValueOnce([fishMock]);
+    const res = await fishLogController.getAllFishLogsAdmin(
+      mockRequest,
+      response
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should get a statusCode 200 with admin request and get all fishlogs', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    const fishLogRepository = connection.getRepository(FishLog);
+
     mockRequest.headers = {
       authorization: 'Bearer mockToken',
     };
@@ -232,9 +359,9 @@ describe('Test Get One FishLog function', () => {
     };
 
     mockRequest.user = {
-      id: '3472417428',
+      id: '3434s',
       admin: true,
-      superAdmin: true,
+      superAdmin: false,
     };
     const response = mockResponse();
     fishLogRepository.findOne = jest.fn().mockResolvedValueOnce(fishMock);
@@ -242,7 +369,7 @@ describe('Test Get One FishLog function', () => {
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
-  it('should get a statusCode 200 with author request', async () => {
+  it('should get a statusCode 200 with admin request', async () => {
     const mockRequest = {} as RequestWithUserRole;
     const fishLogRepository = connection.getRepository(FishLog);
     mockRequest.headers = {
@@ -253,8 +380,8 @@ describe('Test Get One FishLog function', () => {
     };
 
     mockRequest.user = {
-      id: '3472417428',
-      admin: true,
+      id: '3434s',
+      admin: false,
       superAdmin: true,
     };
     const response = mockResponse();

@@ -27,6 +27,12 @@ export default class FishLog {
     longitude: number;
   };
 
+  @Column('simple-json')
+  coordenatesFake?: {
+    latitude: number;
+    longitude: number;
+  };
+
   @Column({ nullable: true })
   photo?: string;
 
@@ -35,12 +41,6 @@ export default class FishLog {
 
   @Column({ nullable: true })
   weight?: number;
-
-  @Column({ nullable: true })
-  reviewed?: boolean;
-
-  @Column({ nullable: true })
-  reviewedBy?: string;
 
   @Column({ nullable: true })
   visible?: boolean;
@@ -53,15 +53,6 @@ export default class FishLog {
 
   @Column({ nullable: true })
   updatedAt?: Date;
-
-  @Column({ nullable: true })
-  updatedBy?: string;
-
-  @Column({ nullable: true })
-  deletedAt?: Date;
-
-  @Column({ nullable: true })
-  deletedBy?: string;
 
   constructor() {
     if (!this.id) {
