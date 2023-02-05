@@ -1,74 +1,33 @@
-# 2021.1-Pro-Especies-FishLog
-[![codecov](https://codecov.io/gh/fga-eps-mds/2021.1-Pro-Especies-FishLog/branch/devel/graph/badge.svg?token=WJVY5IT9WJ)](https://codecov.io/gh/fga-eps-mds/2021.1-Pro-Especies-FishLog)
+# 2022.2-EuPescador-FishLog
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=fga-eps-mds_2022.2-EuPescador-FishLog&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=fga-eps-mds_2022.2-EuPescador-FishLog) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=fga-eps-mds_2022.2-EuPescador-FishLog&metric=coverage)](https://sonarcloud.io/summary/new_code?id=fga-eps-mds_2022.2-EuPescador-FishLog) 
+
 ## 1. Ambiente de desenvolvimento
 Para fazer uso do ambiente de desenvolvimento é necessário possuir dois pacotes instalados.
 * docker
 * docker-compose
 
-## 1.1 Mas o que é Docker?
+### 1.1 Mas o que é Docker?
 Docker é uma plataforma aberta, criada com o objetivo de facilitar o desenvolvimento, a implantação e a execução de aplicações em ambientes isolados. Para uma base maior do seu propósito e funcionamento é possível acessar o seguinte link:
 
 https://www.redhat.com/pt-br/topics/containers/what-is-docker
 
-### 1.1 Instalação do Docker
-*O tutorial será baseado em sistemas Debian-based ou seja Ubuntu, Mint, Debian e etc*
-
-Primeiro se faz necessário dar o seguinte comando:
-
-```bash
-sudo apt-get update
-```
-
-Agora se faz necessário a instalação de aguns pacotes de pré-requisitos:
-
-```bash
-sudo apt-get install  curl apt-transport-https ca-certificates software-properties-common
-```
-
-Após isso, podemos adicionar os repositórios para acesso ao pacote docker com os seguintes comandos:
-
-```bash
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-```
-
-```bash
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-```
-
-```bash
-sudo apt update
-```
-
-Agora finalmente a instalação do pacote:
-
-```
-sudo apt install docker-ce
-```
-
-Com o docker instalado é muito importante a configuração de Post-installation. Que pode ser vista no seguinte link:
-https://docs.docker.com/engine/install/linux-postinstall/
-
-### 1.2 Instalação do Docker-compose
-
-Para instalação do **docker-compose**, basta rodar os seguintes comandos:
-
-```bash
-sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-```
-
-```bash
-sudo chmod +x /usr/local/bin/docker-compose
-```
-
-
-## 1.3 Uso do Docker e Docker-compose
+## 1.2 Uso do Docker e Docker-compose
 Para efetuar o build das imagens só se faz necessário rodar o seguinte comando na raiz do projeto:
 
 ```bash
-make
+docker compose build
 ```
 
 Após o build, podemos fazer o comando na raiz do projeto para iniciar a imagem criada:
 ```bash
-make up
+docker compose up
+```
+
+## 2. Configurações  
+Para configurar o serviço deve criar variáveis de ambiente no servidor de acordo com arquivo .env.example
+
+### 2.1 Migrations  
+Para subir as migrations só se faz necessário rodar os seguintes comandos na raiz do projeto:
+```bash
+yarn migration:run
 ```
